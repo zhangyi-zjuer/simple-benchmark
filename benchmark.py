@@ -20,7 +20,7 @@ class Benchmark(object):
             url_file: 包含测试URL的文件，一行一个
             c: 并发数
             n: 测试url总数
-            request_timeout: 请求超时时间
+            request_timeout: 请求超时时间(s)
             verbose: 是否打印每个请求的时间
             host: 替换host, 如果该参数为None表示不替换
         """
