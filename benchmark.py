@@ -9,10 +9,21 @@ import threadpool
 
 
 class Benchmark(object):
+    """用于压力测试的简单实现
+    """
     lock = threading.Lock()
     request_info = []
 
-    def __init__(self, url_file, c=10, n=1000, request_timeout=60, verbose=True, host='127.0.0.1'):
+    def __init__(self, url_file, c=10, n=1000, request_timeout=60, verbose=True, host=None):
+        """
+        Args:
+            url_file: 包含测试URL的文件，一行一个
+            c: 并发数
+            n: 测试url总数
+            request_timeout: 请求超时时间
+            verbose: 是否打印每个请求的时间
+            host: 替换host, 如果该参数为None表示不替换
+        """
         self.url_file = url_file
         self.c = c
         self.n = n
