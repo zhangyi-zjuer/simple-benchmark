@@ -14,15 +14,15 @@ class Benchmark(object):
     lock = threading.Lock()
     request_info = []
 
-    def __init__(self, url_file, c=10, n=1000, request_timeout=60, verbose=True, host=None):
+    def __init__(self, url_file, c=10, n=1000, request_timeout=60, verbose=True, host=None, response_func=None):
         """
-        Args:
-            url_file: 包含测试URL的文件，一行一个
-            c: 并发数
-            n: 测试url总数
-            request_timeout: 请求超时时间(s)
-            verbose: 是否打印每个请求的时间
-            host: 替换host, 如果该参数为None表示不替换
+       @param url_file: 包含测试URL的文件，一行一个
+       @param     c: 并发数
+       @param     n: 测试url总数
+       @param     request_timeout: 请求超时时间
+       @param     verbose: 是否打印每个请求的时间
+       @param     host: 替换host, 如果该参数为None表示不替换
+       @param     response_func: 处理返回结果的函数
         """
         self.url_file = url_file
         self.c = c
@@ -30,11 +30,20 @@ class Benchmark(object):
         self.request_timeout = request_timeout
         self.verbose = verbose
         self.host = host
+        self.response_func = response_func
 
     def get_url(self, line):
         if not self.host:
             return line
         return re.sub(r'^http://.*?/', 'http://%s/' % self.host, line)
+
+    @staticmethod
+    def deal_with_response(self, response):
+        """
+        @param response: 请求返回值
+        @return: 处理后的值
+        """
+        return ''
 
     def load_query(self):
         queries = []
@@ -62,14 +71,20 @@ class Benchmark(object):
             request_success = True
         except:
             pass
+
+        if hasattr(self.response_func, '__call__'):
+            response = self.response_func(response)
+        else:
+            response = ''
+
         request_end = time.time()
         request_use = request_end - request_start
 
         self.lock.acquire()
 
-        self.request_info.append((request_success, url, request_start, request_end, request_use ))
+        self.request_info.append((request_success, url, request_start, request_end, request_use, response))
 
-        # show request vervose
+        # show request verbose
         if self.verbose:
             print '%d\ttake:%dms\t%s' % (len(self.request_info), (request_end - request_start) * 1000, url)
 
@@ -101,7 +116,7 @@ class Benchmark(object):
         total_request_time = 0.0
 
         for ele in self.request_info:
-            is_success, url, t0, t1, t = ele
+            is_success, url, t0, t1, t, _ = ele
 
             if t0 < begin:
                 begin = t0
@@ -134,3 +149,5 @@ class Benchmark(object):
         return '\n' + re.sub(r'(?m)^\s+', '', result) % (concurrency_level, time_taken_for_test, total_request,
                                                          failed_request, requests_per_seconds, time_per_request * 1000,
                                                          time_per_request_across_all * 1000)
+
+
