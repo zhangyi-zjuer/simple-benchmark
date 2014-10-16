@@ -1,0 +1,8 @@
+*.pyc
+*.log
+.idea/
+data/
+log/
+*.csv
+*.db
+tags
