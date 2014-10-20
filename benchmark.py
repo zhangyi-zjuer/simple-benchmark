@@ -65,14 +65,14 @@ class Benchmark(object):
             request_success = True
         except:
             pass
+		
+		request_end = time.time()
+        request_use = request_end - request_start
 
         if hasattr(self.response_func, '__call__'):
             response = self.response_func(response)
         else:
             response = ''
-
-        request_end = time.time()
-        request_use = request_end - request_start
 
         self.lock.acquire()
 
