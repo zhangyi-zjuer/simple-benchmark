@@ -95,7 +95,7 @@ class Benchmark(object):
         reqs = threadpool.makeRequests(self.send_request, queries)
         [pool.putRequest(req) for req in reqs]
         pool.wait()
-		pool.dismissWorkers(self.c, do_join=True)
+		pool.dismissWorkers(self.c)
 
     def get_all_request_info(self):
         return self.request_info
