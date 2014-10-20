@@ -16,7 +16,7 @@ class Benchmark(object):
 
     def __init__(self, url_file, c=10, n=1000, request_timeout=60, verbose=True, host=None, response_func=None):
         """
-       @param url_file: 包含测试URL的文件，一行一个
+       @param     url_file: 包含测试URL的文件，一行一个
        @param     c: 并发数
        @param     n: 测试url总数
        @param     request_timeout: 请求超时时间
@@ -37,14 +37,6 @@ class Benchmark(object):
             return line
         return re.sub(r'^http://.*?/', 'http://%s/' % self.host, line)
 
-    @staticmethod
-    def deal_with_response(self, response):
-        """
-        @param response: 请求返回值
-        @return: 处理后的值
-        """
-        return ''
-
     def load_query(self):
         queries = []
         current_n = 0
@@ -54,7 +46,9 @@ class Benchmark(object):
                 line = line.strip()
                 if len(line) < 10:
                     continue
+
                 queries.append(self.get_url(line))
+
                 current_n += 1
                 if current_n >= self.n:
                     break
