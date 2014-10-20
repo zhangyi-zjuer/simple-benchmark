@@ -65,14 +65,16 @@ class Benchmark(object):
             request_success = True
         except:
             pass
-		
-		request_end = time.time()
+
+        request_end = time.time()
         request_use = request_end - request_start
 
         if hasattr(self.response_func, '__call__'):
             response = self.response_func(response)
         else:
             response = ''
+
+
 
         self.lock.acquire()
 
@@ -95,7 +97,7 @@ class Benchmark(object):
         reqs = threadpool.makeRequests(self.send_request, queries)
         [pool.putRequest(req) for req in reqs]
         pool.wait()
-		pool.dismissWorkers(self.c)
+        pool.dismissWorkers(self.c)
 
     def get_all_request_info(self):
         return self.request_info
@@ -113,6 +115,10 @@ class Benchmark(object):
         for ele in self.request_info:
             is_success, url, t0, t1, t, _ = ele
 
+            if not is_success:
+                fail.append(url)
+                continue
+
             if t0 < begin:
                 begin = t0
 
@@ -121,28 +127,25 @@ class Benchmark(object):
 
             total_request_time += t
 
-            if not is_success:
-                fail.append(url)
-
         concurrency_level = self.c
         time_taken_for_test = end - begin
         failed_request = len(fail)
-        requests_per_seconds = total_request / time_taken_for_test
-        time_per_request = total_request_time / total_request
-        time_per_request_across_all = time_taken_for_test / total_request
+        success_request = total_request - failed_request
+        requests_per_seconds = time_taken_for_test and success_request / time_taken_for_test
+        time_per_request = success_request and total_request_time / success_request
+        time_per_request_across_all = success_request and time_taken_for_test / success_request
 
         result = """
             Concurrency Level:      %d
             Time taken for tests:   %.3f second
             Total requests:         %d
             Failed requests:        %d
+            Success requests:       %d
             Requests per second:    %.2f [#/sec] (mean)
             Time per request:       %.3f [ms] (mean)
             Time per request:       %.3f [ms] (mean, across all concurrent requests)
         """.strip()
 
         return '\n' + re.sub(r'(?m)^\s+', '', result) % (concurrency_level, time_taken_for_test, total_request,
-                                                         failed_request, requests_per_seconds, time_per_request * 1000,
+                                                         failed_request, success_request, requests_per_seconds, time_per_request * 1000,
                                                          time_per_request_across_all * 1000)
-
-
